@@ -1,0 +1,67 @@
+---
+layout:     post
+comments: true
+title:      "Understanding Spanning Tree Protocol and its functions"
+description: "Looking at one of the objectives in the CCNA 200-301 blueprint"
+date:       2020-08-18 18:00:00
+author:     "Jasmeet Gill"
+header-img: assets/img/cisco.jpg
+
+categories:
+  - Cisco
+---
+
+I found this subject a little challenging at first, but once you have it down it is really not that complicated. Lets start by looking at the objectives of the CCNA exam regarding spanning-tree:
+
+**2.5 Describe the need for and basic operations of Rapid PVST+ Spanning Tree Protocol and identify basic operations**
+
+ * *2.5.a Root port, root bridge (primary/secondary), and other port names*
+ * *2.5.b Port states (forwarding/blocking)*
+ * *2.5.c PortFast benefits*
+
+ Lets start by quickly looking at why we have spanning-tree. Take the following example below:
+
+![My helpful screenshot](/assets/img/png3.png)
+
+Here we have two switches interconnected with 2 ethernet links. Lets look at how looping occurs in this topology:
+
+1. Host A requests the MAC address of Host B, and sends out an ARP request.
+2. Switch A will forward out the frames from both its interface to Switch B
+3. Switch B will forward the frame on every interface (by definition a broadcast) except the interface in which the frame was received on.
+4. Switch B will forward the frame back to Switch A on the redundant link, and vice versa. As a consequence, both the switches will keep forwarding frames between each other, creating a looping of frames.
+
+
+## Spanning-tree solves this problem - how? 
+
+Spanning-tree helps us by blocking certain interfaces using a set of metrics to decide which ports to block and which to forward. As a result we can have multiple redundant links and not have to worry about looping.
+STP uses **bridge protocol data units** to communicate between the switches (known as BPDUs).
+
+Using these frames, the switches elect how the STP topology will look by:
+
+1. Electing a "master" - also called **root bridge** - based on certain terms
+2. Choosing which interfaces to block and which interfaces to forward
+
+The root bridge is elected by looking at information in the BPDUs - containing **mac address** and **priority**. Combining these two a bridge ID is formed - the lowest wins. We can change this manually by setting the priority:
+
+<pre><code>Jasmeet(config)#spanning-tree vlan 1 priority 
+</code></pre>
+
+After the root root bridge election is done, STP places all the ports here as **designated** (this means forwarding). Now the confusing part, what about rest of the switches and how are the ports determined?
+
+First defining ports (important!)
+
+1. **Root Port**: Lowest path cost to our root bridge. Bandwidth is used as a metric in case of multiple paths to root bridge (checking bandwidth of each link). Higher is better. The lowest cost port (highest bandwidth) is elected as a root port. 
+2. **Designated port**: One designated port per segment, lowest cost to get on a given network compared to other ports on that segment
+3. **Non-designated port**: Put in a **blocking** state, non-root / non-designated ports. Higher cost.
+
+  | Bandwidth | Cost |
+  |-----------|------| 
+  | 10 mbit: | 100  |
+  | 100 mbit:  | 19   |
+  | 1000 mbit: | 4    |
+
+
+Lets look at this through an example:
+
+![My helpful screenshot](/assets/img/stpcost.png)
+
