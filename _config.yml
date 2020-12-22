@@ -35,7 +35,7 @@ footer_link_two_link: "/categories"
 footer_link_three_name: #FOOTER_NAME_GOES_HERE
 footer_link_three_link: #FOOTER_LINK_GOES_HERE
 
-baseurl: ""
+baseurl: "/github-io"
 google_tracking_id: UA-26371954-1
 copyright_name: Mathson Design, LLC
 
